@@ -1,0 +1,164 @@
+[
+  {
+    "name": "Google Analytics",
+    "category": "Analytics",
+    "patterns": ["google-analytics.com", "analytics.google.com", "googletagmanager.com/gtag"],
+    "why_it_matters": "Collects visitor behavior; may need consent under GDPR/CCPA."
+  },
+  {
+    "name": "Google Tag Manager",
+    "category": "Analytics",
+    "patterns": ["googletagmanager.com/gtm.js", "googletagmanager.com/gtm"],
+    "why_it_matters": "Loads other tags dynamically — tag governance is critical when GTM is present."
+  },
+  {
+    "name": "Google Ads / DoubleClick",
+    "category": "Advertising",
+    "patterns": ["doubleclick.net", "googleadservices.com", "googlesyndication.com", "pagead2.googlesyndication.com"],
+    "why_it_matters": "Ad targeting and conversion tracking; high privacy sensitivity."
+  },
+  {
+    "name": "Meta Pixel",
+    "category": "Advertising",
+    "patterns": ["connect.facebook.net", "facebook.com/tr", "facebook.net/signals"],
+    "why_it_matters": "Retargeting and conversion tracking across Meta platforms."
+  },
+  {
+    "name": "Adobe Analytics / Experience Cloud",
+    "category": "Analytics",
+    "patterns": ["omtrdc.net", "2o7.net", "demdex.net", "adobedtm.com", "adobe.com/analytics", "assets.adobedtm.com"],
+    "why_it_matters": "Enterprise analytics and audience data; often tied to Adobe identity graph."
+  },
+  {
+    "name": "Adobe Launch / Tags",
+    "category": "Analytics",
+    "patterns": ["lightning.cnn.com", "launch-", "satelliteLib", "assets.adobedtm.com/launch"],
+    "why_it_matters": "Tag management container — can load many downstream trackers from one script."
+  },
+  {
+    "name": "Optimizely",
+    "category": "Analytics",
+    "patterns": ["cdn.optimizely.com", "optimizely.com"],
+    "why_it_matters": "A/B testing and experimentation; can track user behavior and variants."
+  },
+  {
+    "name": "Chartbeat",
+    "category": "Analytics",
+    "patterns": ["chartbeat.com", "static.chartbeat.com"],
+    "why_it_matters": "Real-time audience analytics common on news sites."
+  },
+  {
+    "name": "Parse.ly",
+    "category": "Analytics",
+    "patterns": ["parsely.com", "cdn.parsely.com"],
+    "why_it_matters": "Content analytics for publishers; tracks reading behavior."
+  },
+  {
+    "name": "Comscore",
+    "category": "Analytics",
+    "patterns": ["scorecardresearch.com", "comscore.com"],
+    "why_it_matters": "Audience measurement; shares data with industry partners."
+  },
+  {
+    "name": "Hotjar",
+    "category": "Analytics",
+    "patterns": ["hotjar.com", "static.hotjar.com"],
+    "why_it_matters": "Session recordings and heatmaps may capture PII if misconfigured."
+  },
+  {
+    "name": "Microsoft Clarity",
+    "category": "Analytics",
+    "patterns": ["clarity.ms", "scripts.clarity.ms"],
+    "why_it_matters": "Session replay and heatmaps similar to Hotjar."
+  },
+  {
+    "name": "Segment",
+    "category": "Analytics",
+    "patterns": ["cdn.segment.com", "api.segment.io", "cdn.segment.io"],
+    "why_it_matters": "Customer data platform — forwards events to many downstream vendors."
+  },
+  {
+    "name": "HubSpot",
+    "category": "Analytics",
+    "patterns": ["js.hs-scripts.com", "js.hs-analytics.net", "hubspot.com"],
+    "why_it_matters": "Marketing automation; can tie web visits to CRM contacts."
+  },
+  {
+    "name": "LinkedIn Insight",
+    "category": "Advertising",
+    "patterns": ["snap.licdn.com", "px.ads.linkedin.com", "linkedin.com/px"],
+    "why_it_matters": "B2B ads and conversion tracking on LinkedIn."
+  },
+  {
+    "name": "Twitter / X Pixel",
+    "category": "Advertising",
+    "patterns": ["static.ads-twitter.com", "analytics.twitter.com", "t.co/i/adsct"],
+    "why_it_matters": "Ad conversion and audience building on X."
+  },
+  {
+    "name": "TikTok Pixel",
+    "category": "Advertising",
+    "patterns": ["analytics.tiktok.com", "tiktok.com/i18n/pixel"],
+    "why_it_matters": "Advertising attribution for TikTok ads."
+  },
+  {
+    "name": "Amazon Advertising",
+    "category": "Advertising",
+    "patterns": ["amazon-adsystem.com", "aax.amazon-adsystem.com"],
+    "why_it_matters": "Amazon ad network and attribution pixels."
+  },
+  {
+    "name": "Criteo",
+    "category": "Advertising",
+    "patterns": ["criteo.com", "criteo.net", "static.criteo.net"],
+    "why_it_matters": "Retargeting ads based on browsing history."
+  },
+  {
+    "name": "Taboola",
+    "category": "Advertising",
+    "patterns": ["taboola.com", "cdn.taboola.com", "trc.taboola.com"],
+    "why_it_matters": "Content recommendation ads; tracks clicks and impressions."
+  },
+  {
+    "name": "Outbrain",
+    "category": "Advertising",
+    "patterns": ["outbrain.com", "widgets.outbrain.com", "odb.outbrain.com"],
+    "why_it_matters": "Sponsored content widgets; behavioral targeting on news sites."
+  },
+  {
+    "name": "OneTrust / Cookie Consent",
+    "category": "Analytics",
+    "patterns": ["onetrust.com", "cookielaw.org", "optanon", "cdn.cookielaw.org"],
+    "why_it_matters": "Consent management — important for GDPR; still loads scripts that affect page behavior."
+  },
+  {
+    "name": "Snowplow",
+    "category": "Analytics",
+    "patterns": ["snowplow.io", "sp.js", "collector.snowplow.io"],
+    "why_it_matters": "First-party style analytics pipeline; can send data to your own warehouse."
+  },
+  {
+    "name": "New Relic Browser",
+    "category": "Analytics",
+    "patterns": ["newrelic.com", "bam.nr-data.net", "js-agent.newrelic.com"],
+    "why_it_matters": "Real user monitoring; captures performance and JS errors."
+  },
+  {
+    "name": "Cloudflare Zaraz",
+    "category": "Analytics",
+    "patterns": ["zaraz.io", "cloudflare.com/cdn-cgi/zaraz"],
+    "why_it_matters": "Third-party tag gateway; shifts where tags load from."
+  },
+  {
+    "name": "YouTube Embed",
+    "category": "Social",
+    "patterns": ["youtube.com/embed", "ytimg.com", "googlevideo.com"],
+    "why_it_matters": "Embedded video may set Google cookies before user plays."
+  },
+  {
+    "name": "Cloudflare CDN",
+    "category": "CDN",
+    "patterns": ["cdnjs.cloudflare.com"],
+    "why_it_matters": "CDN delivery; lower risk unless analytics (Zaraz) is enabled."
+  }
+]
