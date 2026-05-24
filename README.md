@@ -6,6 +6,17 @@ Enter a URL → get a **forensic-style report** of what the page loads in a real
 
 ![Stack: Vue 3 + FastAPI + Playwright](https://img.shields.io/badge/Vue-3-42b883) ![FastAPI](https://img.shields.io/badge/FastAPI-009688) ![Playwright](https://img.shields.io/badge/Playwright-2EAD33)
 
+## Live demo (GCP Cloud Run)
+
+| | URL |
+|---|-----|
+| **Web app** | https://privacy-web-869322756604.asia-south1.run.app/ |
+| **API** | https://privacy-api-869322756604.asia-south1.run.app |
+| **Health check** | https://privacy-api-869322756604.asia-south1.run.app/health |
+| **OpenAPI docs** | https://privacy-api-869322756604.asia-south1.run.app/docs |
+
+Deployed to **Google Cloud Run** (`asia-south1`) with Docker. First scan on a heavy site may take up to ~60 seconds while Playwright loads the page.
+
 ---
 
 ## Features
@@ -28,6 +39,7 @@ Enter a URL → get a **forensic-style report** of what the page loads in a real
 | Backend | Python 3.12, FastAPI |
 | Scanner | Playwright (sync, thread pool on Windows) |
 | Rules | JSON vendor patterns |
+| Deploy | Docker, Cloud Run (optional local via `docker compose`) |
 
 ---
 
@@ -139,6 +151,9 @@ Vite proxies `/audit` and `/health` to the API (see `frontend/vite.config.js`).
 │   │       └── AuditReport.vue
 │   ├── package.json
 │   └── vite.config.js
+├── backend/Dockerfile
+├── frontend/Dockerfile
+├── docker-compose.yml
 └── README.md
 ```
 
