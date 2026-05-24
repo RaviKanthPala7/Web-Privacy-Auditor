@@ -1,3 +1,4 @@
+import os
 import sys
 
 from fastapi import FastAPI, HTTPException
@@ -5,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.models import AuditReport, AuditRequest
 from app.scanner import _run_audit_sync
-
 # Windows: uvicorn + Playwright work better with Proactor event loop
 if sys.platform == "win32":
     import asyncio
@@ -19,10 +19,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Lets the Vue app (later) call this API from another port (e.g. 5173)
+# Which frontends may call this API (comma-separated in env var CORS_ORIGINS)
+_default_cors = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:3000"
+_cors_origins = [
+    o.strip() for o in os.getenv("CORS_ORIGINS", _default_cors).split(",") if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
