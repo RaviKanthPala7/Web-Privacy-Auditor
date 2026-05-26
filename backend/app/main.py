@@ -24,8 +24,10 @@ _default_cors = (
     "http://localhost:5173,http://localhost:3000,http://127.0.0.1:3000,"
     "https://privacy-web-869322756604.asia-south1.run.app"
 )
+# Empty CORS_ORIGINS env (e.g. bad CI update) must not block defaults
+_cors_raw = os.getenv("CORS_ORIGINS", "").strip()
 _cors_origins = [
-    o.strip() for o in os.getenv("CORS_ORIGINS", _default_cors).split(",") if o.strip()
+    o.strip() for o in (_cors_raw if _cors_raw else _default_cors).split(",") if o.strip()
 ]
 
 app.add_middleware(
