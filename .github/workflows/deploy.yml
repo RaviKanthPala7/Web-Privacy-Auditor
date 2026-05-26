@@ -108,16 +108,30 @@ jobs:
             --allow-unauthenticated \
             --port 8080
 
-      - name: Update API CORS for live frontend
+      # Bad/empty CORS_ORIGINS on Cloud Run overrides main.py defaults — remove it.
+      # Production web URL is already in backend/app/main.py _default_cors.
+      - name: Reset API CORS env (use code defaults)
+        run: |
+          gcloud run services update ${{ env.API_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --remove-env-vars=CORS_ORIGINS
+
+      - name: Verify browser can call API (CORS)
         run: |
           WEB_URL=$(gcloud run services describe ${{ env.WEB_SERVICE }} \
             --region ${{ env.REGION }} \
             --format='value(status.url)')
-          echo "Setting CORS_ORIGINS=${WEB_URL}"
-          # Single URL — no ^@^ delimiter needed (avoids CI mangling)
-          gcloud run services update ${{ env.API_SERVICE }} \
+          API_URL=$(gcloud run services describe ${{ env.API_SERVICE }} \
             --region ${{ env.REGION }} \
-            --update-env-vars="CORS_ORIGINS=${WEB_URL}"
+            --format='value(status.url)')
+          echo "Origin: ${WEB_URL}"
+          echo "API: ${API_URL}/health"
+          HEADERS=$(curl -sS -D - -o /dev/null -H "Origin: ${WEB_URL}" "${API_URL}/health")
+          echo "${HEADERS}"
+          echo "${HEADERS}" | grep -qi "access-control-allow-origin" || {
+            echo "::error::CORS check failed — deploy blocked"
+            exit 1
+          }
 
       - name: Deployment summary
         run: |
