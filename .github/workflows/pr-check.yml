@@ -1,0 +1,38 @@
+# Validate PRs into main (build only — no deploy, no GCP credentials).
+name: PR check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          VITE_API_URL: https://example.com
+        run: |
+          npm ci
+          npm run build
+
+      - name: Validate API Docker image builds
+        run: docker build -t privacy-api-check ./backend
+
+      - name: Validate web Docker image builds
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=https://example.com \
+            -t privacy-web-check \
+            ./frontend

@@ -17,6 +17,8 @@ Enter a URL → get a **forensic-style report** of what the page loads in a real
 
 Deployed to **Google Cloud Run** (`asia-south1`) with Docker. First scan on a heavy site may take up to ~60 seconds while Playwright loads the page.
 
+**CI/CD:** push to `main` auto-deploys via GitHub Actions. PRs into `main` run build checks only. One-time GCP + secret setup: [.github/GCP_SETUP.md](.github/GCP_SETUP.md).
+
 ---
 
 ## Features

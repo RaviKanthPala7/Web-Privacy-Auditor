@@ -1,0 +1,99 @@
+# Deploy API + web to Cloud Run when code is merged/pushed to main.
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+env:
+  PROJECT_ID: web-privacy-auditor
+  REGION: asia-south1
+  AR_REPO: web-privacy-auditor
+  API_SERVICE: privacy-api
+  WEB_SERVICE: privacy-web
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: github-actions-deploy@web-privacy-auditor.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push API image
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/api"
+          gcloud builds submit ./backend \
+            --tag "${IMAGE}:${{ github.sha }}" \
+            --tag "${IMAGE}:latest"
+
+      - name: Deploy API to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.API_SERVICE }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/api:latest \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 2Gi \
+            --timeout 300 \
+            --port 8000
+
+      - name: Resolve API URL
+        id: api
+        run: |
+          URL=$(gcloud run services describe ${{ env.API_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --format='value(status.url)')
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push web image
+        working-directory: frontend
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/web:latest"
+          gcloud builds submit --config=cloudbuild.yaml \
+            --substitutions=_VITE_API_URL=${{ steps.api.outputs.url }},_IMAGE_TAG="${IMAGE}"
+
+      - name: Deploy web to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.WEB_SERVICE }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/web:latest \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080
+
+      - name: Update API CORS for live frontend
+        run: |
+          WEB_URL=$(gcloud run services describe ${{ env.WEB_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --format='value(status.url)')
+          gcloud run services update ${{ env.API_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --update-env-vars=CORS_ORIGINS="${WEB_URL}"
+
+      - name: Deployment summary
+        run: |
+          echo "## Deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "- API: $(gcloud run services describe ${{ env.API_SERVICE }} --region ${{ env.REGION }} --format='value(status.url)')" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Web: $(gcloud run services describe ${{ env.WEB_SERVICE }} --region ${{ env.REGION }} --format='value(status.url)')" >> "$GITHUB_STEP_SUMMARY"
