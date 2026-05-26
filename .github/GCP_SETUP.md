@@ -24,7 +24,7 @@ export SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 gcloud iam service-accounts create ${SA_NAME} \
   --display-name="GitHub Actions deploy" 2>/dev/null || true
 
-for ROLE in run.admin artifactregistry.writer cloudbuild.builds.editor storage.admin iam.serviceAccountUser; do
+for ROLE in run.admin artifactregistry.writer cloudbuild.builds.editor cloudbuild.builds.viewer logging.viewer storage.admin iam.serviceAccountUser; do
   gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${SA_EMAIL}" \
     --role="roles/${ROLE}"
@@ -101,3 +101,4 @@ merge PR           →  push to main →  deploy.yml
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` missing | Add secret from section **C** |
 | `storage.objects.get` / `uploadArtifacts` denied | Grant roles in section **A** to `github-actions-deploy@...` |
 | Deploy fails on port | API `--port 8000`, web `--port 8080` |
+| `can only stream logs if you are Viewer` | Grant `logging.viewer` + `cloudbuild.builds.viewer` to deploy SA, or use `--async` in workflow (already in `deploy.yml`) |

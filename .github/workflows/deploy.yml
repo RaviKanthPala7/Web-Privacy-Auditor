@@ -44,9 +44,22 @@ jobs:
       - name: Build and push API image
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/api"
-          gcloud builds submit ./backend \
+          # --async avoids log-stream permission errors on the GitHub deploy SA
+          BUILD_ID=$(gcloud builds submit ./backend \
+            --async \
             --tag "${IMAGE}:${{ github.sha }}" \
-            --tag "${IMAGE}:latest"
+            --tag "${IMAGE}:latest" \
+            --format='value(id)')
+          echo "Cloud Build ID: ${BUILD_ID}"
+          for i in $(seq 1 60); do
+            STATUS=$(gcloud builds describe "${BUILD_ID}" --format='value(status)')
+            echo "API image build status: ${STATUS}"
+            [ "${STATUS}" = "SUCCESS" ] && exit 0
+            case "${STATUS}" in FAILURE|CANCELLED|EXPIRED|TIMEOUT) exit 1 ;; esac
+            sleep 20
+          done
+          echo "Timed out waiting for API image build"
+          exit 1
 
       - name: Deploy API to Cloud Run
         run: |
@@ -71,8 +84,20 @@ jobs:
         working-directory: frontend
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/web:latest"
-          gcloud builds submit --config=cloudbuild.yaml \
-            --substitutions=_VITE_API_URL=${{ steps.api.outputs.url }},_IMAGE_TAG="${IMAGE}"
+          BUILD_ID=$(gcloud builds submit --config=cloudbuild.yaml \
+            --async \
+            --substitutions=_VITE_API_URL=${{ steps.api.outputs.url }},_IMAGE_TAG="${IMAGE}" \
+            --format='value(id)')
+          echo "Cloud Build ID: ${BUILD_ID}"
+          for i in $(seq 1 30); do
+            STATUS=$(gcloud builds describe "${BUILD_ID}" --format='value(status)')
+            echo "Web image build status: ${STATUS}"
+            [ "${STATUS}" = "SUCCESS" ] && exit 0
+            case "${STATUS}" in FAILURE|CANCELLED|EXPIRED|TIMEOUT) exit 1 ;; esac
+            sleep 15
+          done
+          echo "Timed out waiting for web image build"
+          exit 1
 
       - name: Deploy web to Cloud Run
         run: |
