@@ -113,10 +113,11 @@ jobs:
           WEB_URL=$(gcloud run services describe ${{ env.WEB_SERVICE }} \
             --region ${{ env.REGION }} \
             --format='value(status.url)')
-          echo "CORS_ORIGINS=${WEB_URL}"
+          echo "Setting CORS_ORIGINS=${WEB_URL}"
+          # Single URL — no ^@^ delimiter needed (avoids CI mangling)
           gcloud run services update ${{ env.API_SERVICE }} \
             --region ${{ env.REGION }} \
-            --update-env-vars=^@^CORS_ORIGINS=${WEB_URL}
+            --update-env-vars="CORS_ORIGINS=${WEB_URL}"
 
       - name: Deployment summary
         run: |
