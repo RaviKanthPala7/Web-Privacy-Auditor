@@ -7,6 +7,26 @@ const props = defineProps({
 
 const tab = ref('trackers')
 
+function slugFromUrl(url) {
+  try {
+    return new URL(url).hostname.replace(/\./g, '-')
+  } catch {
+    return 'site'
+  }
+}
+
+function downloadJson() {
+  const json = JSON.stringify(props.report, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const link = document.createElement('a')
+  const slug = slugFromUrl(props.report.url)
+  const date = props.report.scanned_at?.slice(0, 10) || 'report'
+  link.href = URL.createObjectURL(blob)
+  link.download = `privacy-audit-${slug}-${date}.json`
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
+
 function badgeClass(category) {
   const map = {
     Analytics: 'badge-analytics',
@@ -21,7 +41,12 @@ function badgeClass(category) {
 
 <template>
   <section class="card">
-    <h2>Results</h2>
+    <div class="report-header">
+      <h2>Results</h2>
+      <button type="button" class="btn-secondary" @click="downloadJson">
+        Download JSON
+      </button>
+    </div>
     <p class="meta">
       <strong>{{ report.page_title || 'Untitled' }}</strong><br />
       <code>{{ report.url }}</code><br />
