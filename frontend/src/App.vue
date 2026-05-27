@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { runAudit } from './api.js'
 import AuditReport from './components/AuditReport.vue'
 
-const url = ref('https://www.example.com')
+const url = ref('https://infotrust.com/')
 const loading = ref(false)
 const error = ref('')
 const report = ref(null)
@@ -42,7 +42,7 @@ async function submit() {
       <input
         v-model="url"
         type="url"
-        placeholder="https://example.com"
+        placeholder="https://infotrust.com"
         required
         :disabled="loading"
       />
